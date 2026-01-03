@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized typography to four font sizes (Large/Medium/Small/Extra Small).
 - Styled Active Repos list as bubble-like chips.
 - Styled Assigned Issues repo links as 12px pill chips.
+- Styled Activity Feed repo names as 14px grey pills; Active Repos pills now 14px with a light-blue background for contrast.
 
 ## [1.1.0] - 2026-01-02
 
