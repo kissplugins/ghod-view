@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved typography/layout CSS from inline `<style>` to external `styles.css`.
 - Debug panel now defaults to off (can be enabled via Settings).
 - Standardized typography to four font sizes (Large/Medium/Small/Extra Small).
+- Replaced the top-left "GT" badge with the `hyperview-octo.png` logo image (scaled to fit via CSS).
 - Styled Active Repos list as bubble-like chips.
 - Styled Assigned Issues repo links as 12px pill chips.
 - Styled Activity Feed repo names as 14px grey pills; Active Repos pills now 14px with a light-blue background for contrast.

@@ -15,7 +15,13 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif; background: #f6f8fa; color: #24292f; }
 .header { background: white; border-bottom: 1px solid #d0d7de; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
 .header-left { display: flex; align-items: center; gap: 12px; }
-.logo { width: 40px; height: 40px; background: #4169e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: var(--fs-lg); }
+/*
+	SAFEGUARD (LLM): App logo
+	- The logo is an image (hyperview-octo.png) scaled to fit this fixed box.
+	- Keep sizing here so header and login stay consistent.
+*/
+.logo { width: 40px; height: 40px; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.logo-img { width: 100%; height: 100%; display: block; object-fit: contain; }
 .header-title h1 { font-size: var(--fs-md); font-weight: 600; margin-bottom: 2px; }
 .header-title p { font-size: var(--fs-sm); color: #57606a; }
 .header-right { display: flex; align-items: center; gap: 20px; font-size: var(--fs-sm); color: #57606a; }
