@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    function GitHubActivityFeed() {
+      const [token, setToken] = React.useState(localStorage.getItem('gh_token') || '');
+      const [activity, setActivity] = React.useState([]);
+      
+      async function fetchActivity() {
+        const headers = { 'Authorization': `token ${token}` };
+        
+        // Fetch your events
+        const response = await fetch('https://api.github.com/users/noelsaw1/events', { headers });
+        const events = await response.json();
+        
+        // Group by day
+        const grouped = events.reduce((acc, event) => {
+          const day = event.created_at.split('T')[0];
+          if (!acc[day]) acc[day] = [];
+          acc[day].push(event);
+          return acc;
+        }, {});
+        
+        setActivity(grouped);
+      }
+      
+      return (
+        <div>
+          <input 
+            type="password" 
+            value={token} 
+            onChange={(e) => {
+              setToken(e.target.value);
+              localStorage.setItem('gh_token', e.target.value);
+            }}
+            placeholder="GitHub Token"
+          />
+          <button onClick={fetchActivity}>Load Activity</button>
+          
+          {Object.entries(activity).map(([day, events]) => (
+            <div key={day}>
+              <h2>{day}</h2>
+              <ul>
+                {events.map(e => (
+                  <li key={e.id}>
+                    {e.type} - <a href={`https://github.com/${e.repo.name}`} target="_blank" rel="noopener noreferrer">{e.repo.name}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<GitHubActivityFeed />, document.getElementById('root'));
+  </script>
+</body>
+</html>
