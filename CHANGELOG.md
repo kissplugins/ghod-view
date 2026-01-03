@@ -5,12 +5,9 @@ All notable changes to GHOD View will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-01-02
+
 ## [1.1.0] - 2026-01-02
-
-## [1.1.1] - 2026-01-02
-
-### Added
-- Pull request events now show the PR title with a direct link in the activity feed.
 
 ### Added
 - Previous/Today day filter using local timezone day keys with on-screen debug panel (toggleable via Settings bar).

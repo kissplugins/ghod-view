@@ -39,9 +39,6 @@
     .activity-branch { font-size: 12px; color: #57606a; margin-top: 4px; }
     .activity-branch a { color: #0969da; text-decoration: none; }
     .activity-branch a:hover { text-decoration: underline; }
-    .activity-pr { font-size: 12px; color: #57606a; margin-top: 4px; }
-    .activity-pr a { color: #0969da; text-decoration: none; }
-    .activity-pr a:hover { text-decoration: underline; }
     .card { background: white; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 16px; overflow: hidden; }
     .card-header { padding: 16px 20px; border-bottom: 1px solid #d0d7de; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
     .card-body { padding: 20px; }
@@ -265,15 +262,6 @@
         };
       };
 
-      const getPullRequestData = (event) => {
-        const pr = event?.payload?.pull_request;
-        if (!pr) return null;
-        return {
-          title: pr.title || 'Pull request',
-          url: pr.html_url || pr._links?.html?.href
-        };
-      };
-
       const getLocalDayKey = (value) => new Date(value).toLocaleDateString('en-CA');
 
       const todayDate = new Date();
@@ -453,8 +441,6 @@
                           (e.type === 'CreateEvent' && e.payload?.ref_type === 'branch') ||
                           (e.type === 'DeleteEvent' && e.payload?.ref_type === 'branch')
                         );
-                        const prInfo = getPullRequestData(e);
-                        const isPullRequestEvent = e.type === 'PullRequestEvent' && prInfo;
                         
                         return (
                           <div key={e.id} className="activity-item">
@@ -469,11 +455,6 @@
                               {isBranchEvent && branchInfo && (
                                 <div className="activity-branch">
                                   Branch: <a href={branchInfo.url} target="_blank" rel="noopener noreferrer">{branchInfo.branch}</a>
-                                </div>
-                              )}
-                              {isPullRequestEvent && prInfo && (
-                                <div className="activity-pr">
-                                  PR: <a href={prInfo.url} target="_blank" rel="noopener noreferrer">{prInfo.title}</a>
                                 </div>
                               )}
                               {desc && <div className="activity-desc">{desc}</div>}
