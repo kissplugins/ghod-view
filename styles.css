@@ -29,7 +29,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'He
 .activity-content { flex: 1; }
 .activity-type { font-size: var(--fs-xs); color: #57606a; font-weight: 500; margin-bottom: 4px; }
 .activity-repo { font-size: var(--fs-sm); }
-.activity-repo a { color: #0969da; text-decoration: none; font-weight: 500; }
+.activity-repo a { color: #0969da; text-decoration: none; font-weight: 500; display: inline-block; padding: 4px 10px; border: 1px solid #d0d7de; border-radius: 999px; background: #f6f8fa; font-size: var(--fs-sm); line-height: 1; }
 .activity-repo a:hover { text-decoration: underline; }
 .activity-desc { font-size: var(--fs-sm); color: #57606a; margin-top: 4px; }
 .activity-time { font-size: var(--fs-xs); color: #57606a; margin-top: 4px; }
@@ -51,11 +51,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'He
 .issue-title { font-size: var(--fs-sm); margin-bottom: 6px; }
 .issue-title a { color: #24292f; text-decoration: none; font-weight: 500; }
 .issue-title a:hover { color: #0969da; }
-.issue-meta { font-size: var(--fs-xs); color: #57606a; }
+.issue-meta { font-size: var(--fs-xs); color: #57606a; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.issue-repo-chip { color: #0969da; text-decoration: none; padding: 4px 10px; border: 1px solid #d0d7de; border-radius: 999px; background: #f6f8fa; font-size: var(--fs-xs); line-height: 1; display: inline-block; }
+.issue-repo-chip:hover { text-decoration: underline; }
 .issue-number { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
 .repos-bar { background: white; border-bottom: 1px solid #d0d7de; padding: 12px 32px; font-size: var(--fs-sm); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .repos-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.repo-chip { color: #0969da; text-decoration: none; padding: 6px 12px; border: 1px solid #d0d7de; border-radius: 999px; background: #f6f8fa; font-size: var(--fs-xs); line-height: 1; }
+.repo-chip { color: #0969da; text-decoration: none; padding: 6px 12px; border: 1px solid #d0d7de; border-radius: 999px; background: #ddf4ff; font-size: var(--fs-sm); line-height: 1; }
 .repo-chip:hover { text-decoration: underline; }
 .filter-bar { background: white; border-bottom: 1px solid #d0d7de; padding: 12px 32px; display: flex; align-items: center; gap: 10px; font-size: var(--fs-sm); }
 .filter-label { font-size: var(--fs-xs); color: #57606a; }
@@ -65,6 +67,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'He
 .debug-chip { padding: 4px 8px; border: 1px dashed #d0d7de; border-radius: 6px; background: #f6f8fa; font-size: var(--fs-xs); color: #57606a; }
 .debug-card { background: #fff8dc; border: 1px dashed #d29922; border-radius: 6px; margin: 12px 32px 0 32px; padding: 12px 16px; font-size: var(--fs-xs); color: #24292f; }
 .debug-pre { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; padding: 8px; overflow: auto; font-size: var(--fs-xs); line-height: 1.5; }
+.font-inspector-overlay { position: fixed; right: 16px; bottom: 16px; background: #fff; border: 1px solid #d0d7de; border-radius: 10px; padding: 10px 12px; color: #24292f; font-size: var(--fs-xs); max-width: 420px; pointer-events: none; line-height: 1.4; min-height: 6.5em; }
+.font-inspector-title { font-weight: 600; margin-bottom: 6px; }
+.font-inspector-target { color: #57606a; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.font-inspector-row { display: flex; gap: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.font-inspector-label { min-width: 56px; color: #57606a; flex-shrink: 0; }
 .config-bar { background: white; border-bottom: 1px solid #d0d7de; padding: 10px 32px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: var(--fs-sm); }
 .config-toggle { padding: 6px 10px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; font-size: var(--fs-xs); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 .config-toggle.active { background: #1a7f37; border-color: #1a7f37; color: white; }

@@ -28,8 +28,52 @@
       const [showDebug, setShowDebug] = React.useState(false);
       const [showConfig, setShowConfig] = React.useState(false);
       const [enableDebugUI, setEnableDebugUI] = React.useState(true);
+      const [enableTypographyInspect, setEnableTypographyInspect] = React.useState(false);
+      const [hoveredTypography, setHoveredTypography] = React.useState(null);
       const [debugInfo, setDebugInfo] = React.useState({ fetchError: null, keys: [] });
       const [prCache, setPrCache] = React.useState({});
+
+      React.useEffect(() => {
+        if (!enableTypographyInspect || !enableDebugUI) {
+          setHoveredTypography(null);
+          return;
+        }
+
+        let rafId = 0;
+        const handler = (e) => {
+          if (rafId) return;
+          const { clientX, clientY } = e;
+          rafId = window.requestAnimationFrame(() => {
+            rafId = 0;
+            const el = document.elementFromPoint(clientX, clientY);
+            if (!el) return;
+            if (el.closest('[data-debug-ui="true"]')) return;
+
+            const cs = window.getComputedStyle(el);
+            const tag = el.tagName ? el.tagName.toLowerCase() : '';
+            const id = el.id ? `#${el.id}` : '';
+            const className = typeof el.className === 'string' && el.className.trim() ? `.${el.className.trim().replace(/\s+/g, '.')}` : '';
+
+            setHoveredTypography({
+              tag,
+              id,
+              className,
+              fontFamily: cs.fontFamily,
+              fontSize: cs.fontSize,
+              fontWeight: cs.fontWeight,
+              lineHeight: cs.lineHeight,
+              fontStyle: cs.fontStyle,
+              letterSpacing: cs.letterSpacing,
+            });
+          });
+        };
+
+        window.addEventListener('pointermove', handler, { passive: true });
+        return () => {
+          window.removeEventListener('pointermove', handler);
+          if (rafId) window.cancelAnimationFrame(rafId);
+        };
+      }, [enableTypographyInspect, enableDebugUI]);
       
       React.useEffect(() => {
         if (token) {
@@ -393,9 +437,28 @@
                 >
                   {enableDebugUI ? 'Disable' : 'Enable'} Debug UI
                 </button>
+                <button
+                  className={`config-toggle ${enableTypographyInspect ? 'active' : ''}`}
+                  onClick={() => setEnableTypographyInspect(!enableTypographyInspect)}
+                >
+                  {enableTypographyInspect ? 'Disable' : 'Enable'} Typography Inspect
+                </button>
               </>
             )}
           </div>
+
+          {enableTypographyInspect && enableDebugUI && hoveredTypography && (
+            <div className="font-inspector-overlay" data-debug-ui="true">
+              <div className="font-inspector-title">Typography</div>
+              <div className="font-inspector-target">{hoveredTypography.tag}{hoveredTypography.id}{hoveredTypography.className}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Family</span>{hoveredTypography.fontFamily}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Size</span>{hoveredTypography.fontSize}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Weight</span>{hoveredTypography.fontWeight}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Line</span>{hoveredTypography.lineHeight}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Style</span>{hoveredTypography.fontStyle}</div>
+              <div className="font-inspector-row"><span className="font-inspector-label">Letter</span>{hoveredTypography.letterSpacing}</div>
+            </div>
+          )}
 
           {uniqueRepos.length > 0 && (
             <div className="repos-bar">
@@ -437,11 +500,29 @@
           </div>
 
           {showDebug && enableDebugUI && (
-            <div className="debug-card">
+            <div className="debug-card" data-debug-ui="true">
               <div><strong>Debug:</strong> dayFilter={dayFilter}, todayKey={todayKey}, previousDayKey={previousDayKey}</div>
               <div style={{ marginTop: '4px' }}>Resolved previousTargetKey: {previousTargetKey || 'none'}</div>
               <div style={{ marginTop: '6px' }}>Available days (newest first):</div>
               <div className="debug-pre">{availableDayKeys.join('\n') || 'none'}</div>
+              {enableTypographyInspect && (
+                <>
+                  <div style={{ marginTop: '10px' }}><strong>Typography Inspect:</strong> hover elements to see computed font metrics.</div>
+                  <div className="debug-pre">
+                    {hoveredTypography
+                      ? [
+                          `target: ${hoveredTypography.tag}${hoveredTypography.id}${hoveredTypography.className}`,
+                          `font-family: ${hoveredTypography.fontFamily}`,
+                          `font-size: ${hoveredTypography.fontSize}`,
+                          `font-weight: ${hoveredTypography.fontWeight}`,
+                          `line-height: ${hoveredTypography.lineHeight}`,
+                          `font-style: ${hoveredTypography.fontStyle}`,
+                          `letter-spacing: ${hoveredTypography.letterSpacing}`
+                        ].join('\n')
+                      : 'Hover an element…'}
+                  </div>
+                </>
+              )}
               {debugInfo.fetchError && (
                 <div style={{ marginTop: '6px', color: '#cf222e' }}>Fetch error: {debugInfo.fetchError}</div>
               )}
@@ -568,7 +649,9 @@
                           </a>
                         </div>
                         <div className="issue-meta">
-                          <a href={repoUrl} target="_blank" rel="noopener noreferrer">{repoName}</a> • <span className="issue-number">#{issue.number}</span>
+                          <a className="issue-repo-chip" href={repoUrl} target="_blank" rel="noopener noreferrer">{repoName}</a>
+                          <span>•</span>
+                          <span className="issue-number">#{issue.number}</span>
                         </div>
                       </div>
                     );
