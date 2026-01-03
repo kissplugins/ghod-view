@@ -1,9 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GHOD View - GitHub Daily Activity Stream</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif; background: #f6f8fa; color: #24292f; }
+    .header { background: white; border-bottom: 1px solid #d0d7de; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 40px; height: 40px; background: #4169e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px; }
+    .header-title h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+    .header-title p { font-size: 13px; color: #57606a; }
+    .header-right { display: flex; align-items: center; gap: 20px; font-size: 13px; color: #57606a; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; display: flex; gap: 24px; }
+    .main-content { flex: 2; }
+    .sidebar { flex: 1; max-width: 380px; }
+    .day-section { background: white; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 16px; overflow: hidden; }
+    .day-header { font-size: 16px; font-weight: 600; padding: 16px 20px; border-bottom: 1px solid #d0d7de; background: #f6f8fa; }
+    .activity-item { padding: 16px 20px; border-bottom: 1px solid #d0d7de; display: flex; gap: 12px; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; color: white; font-weight: bold; }
+    .activity-icon.push { background: #0969da; }
+    .activity-icon.create { background: #1a7f37; }
+    .activity-icon.delete { background: #cf222e; }
+    .activity-icon.issues { background: #d29922; }
+    .activity-icon.member { background: #8250df; }
+    .activity-content { flex: 1; }
+    .activity-type { font-size: 12px; color: #57606a; font-weight: 500; margin-bottom: 4px; }
+    .activity-repo { font-size: 14px; }
+    .activity-repo a { color: #0969da; text-decoration: none; font-weight: 500; }
+    .activity-repo a:hover { text-decoration: underline; }
+    .activity-desc { font-size: 13px; color: #57606a; margin-top: 4px; }
+    .activity-time { font-size: 12px; color: #57606a; margin-top: 4px; }
+    .card { background: white; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 16px; overflow: hidden; }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid #d0d7de; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .card-body { padding: 20px; }
+    .notes-textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; }
+    .notes-textarea:focus { outline: none; border-color: #0969da; }
+    .notes-hint { font-size: 12px; color: #57606a; margin-top: 8px; }
+    .issue-item { padding: 12px 0; border-bottom: 1px solid #d0d7de; }
+    .issue-item:first-child { padding-top: 0; }
+    .issue-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .issue-title { font-size: 14px; margin-bottom: 6px; }
+    .issue-title a { color: #24292f; text-decoration: none; font-weight: 500; }
+    .issue-title a:hover { color: #0969da; }
+    .issue-meta { font-size: 12px; color: #57606a; }
+    .issue-number { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+    .repos-bar { background: white; border-bottom: 1px solid #d0d7de; padding: 12px 32px; font-size: 13px; }
+    .repos-bar a { color: #0969da; text-decoration: none; margin: 0 8px; }
+    .repos-bar a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -13,102 +63,254 @@
       const [token, setToken] = React.useState(localStorage.getItem('gh_token') || '');
       const [activity, setActivity] = React.useState([]);
       const [assignedIssues, setAssignedIssues] = React.useState([]);
+      const [notes, setNotes] = React.useState(localStorage.getItem('daily_notes') || '');
+      const [user, setUser] = React.useState(null);
+      const [loading, setLoading] = React.useState(false);
+      const [tokenInput, setTokenInput] = React.useState('');
+      
+      React.useEffect(() => {
+        if (token) {
+          fetchActivity();
+        }
+      }, []);
       
       async function fetchActivity() {
+        if (!token) return;
+        setLoading(true);
         const headers = { 'Authorization': `token ${token}` };
         
-        // Fetch your events
-        const response = await fetch('https://api.github.com/users/noelsaw1/events', { headers });
-        const events = await response.json();
+        try {
+          // Fetch authenticated user
+          const userResponse = await fetch('https://api.github.com/user', { headers });
+          const userData = await userResponse.json();
+          setUser(userData);
         
-        // Group by day
-        const grouped = events.reduce((acc, event) => {
-          const day = event.created_at.split('T')[0];
-          if (!acc[day]) acc[day] = [];
-          acc[day].push(event);
-          return acc;
-        }, {});
-        
-        setActivity(grouped);
-        
-        // Fetch assigned issues
-        const issuesResponse = await fetch('https://api.github.com/issues?filter=assigned&state=open&sort=updated&per_page=5', { headers });
-        const issues = await issuesResponse.json();
-        setAssignedIssues(issues);
+          
+          // Fetch user events
+          const response = await fetch(`https://api.github.com/users/${userData.login}/events`, { headers });
+          const events = await response.json();
+          
+          // Group by day
+          const grouped = events.reduce((acc, event) => {
+            const day = event.created_at.split('T')[0];
+            if (!acc[day]) acc[day] = [];
+            acc[day].push(event);
+            return acc;
+          }, {});
+          
+          setActivity(grouped);
+          
+          // Fetch assigned issues
+          const issuesResponse = await fetch('https://api.github.com/issues?filter=assigned&state=open&sort=updated&per_page=5', { headers });
+          const issues = await issuesResponse.json();
+          setAssignedIssues(issues);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          alert('Failed to load GitHub data. Please check your token.');
+        } finally {
+          setLoading(false);
+        }
       }
+      
+      function handleLogin() {
+        if (tokenInput) {
+          setToken(tokenInput);
+          localStorage.setItem('gh_token', tokenInput);
+          fetchActivity();
+        }
+      }
+      
+      function handleLogout() {
+        setToken('');
+        setUser(null);
+        setActivity([]);
+        setAssignedIssues([]);
+        localStorage.removeItem('gh_token');
+      }
+      
+      const getEventIcon = (type) => {
+        const icons = {
+          'PushEvent': { label: '➜', class: 'push' },
+          'CreateEvent': { label: '+', class: 'create' },
+          'DeleteEvent': { label: '×', class: 'delete' },
+          'IssuesEvent': { label: '○', class: 'issues' },
+          'IssueCommentEvent': { label: '○', class: 'issues' },
+          'PullRequestEvent': { label: '➜', class: 'push' },
+          'MemberEvent': { label: '★', class: 'member' }
+        };
+        return icons[type] || { label: '•', class: 'push' };
+      };
+
+      const getEventDescription = (event) => {
+        const time = new Date(event.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        if (event.type === 'PushEvent') {
+          return event.payload.commits?.[0]?.message || 'Updated code';
+        } else if (event.type === 'CreateEvent') {
+          return `Created new ${event.payload.ref_type} "${event.payload.ref || ''}"`;
+        } else if (event.type === 'DeleteEvent') {
+          return `Removed deprecated ${event.payload.ref_type} "${event.payload.ref}"`;
+        } else if (event.type === 'IssuesEvent') {
+          return `Opened issue: ${event.payload.issue?.title || ''}`;
+        } else if (event.type === 'IssueCommentEvent') {
+          return `Commented on issue`;
+        }
+        return '';
+      };
+
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       
       // Get unique repos
       const uniqueRepos = [...new Set(
         Object.values(activity).flat().map(e => e.repo.name)
       )].sort();
       
+      if (!token) {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f6f8fa' }}>
+            <div style={{ background: 'white', padding: '40px', borderRadius: '12px', border: '1px solid #d0d7de', maxWidth: '400px', width: '100%' }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div className="logo" style={{ margin: '0 auto 12px', width: '60px', height: '60px', fontSize: '28px' }}>GT</div>
+                <h1 style={{ fontSize: '24px', marginBottom: '8px' }}>GHOD View</h1>
+                <p style={{ color: '#57606a', fontSize: '14px' }}>GitHub Daily Activity Stream</p>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>GitHub Personal Access Token</label>
+                <input 
+                  type="password" 
+                  value={tokenInput}
+                  onChange={(e) => setTokenInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  placeholder="ghp_xxxxxxxxxxxx"
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #d0d7de', borderRadius: '6px', fontSize: '14px', marginBottom: '12px' }}
+                />
+                <button 
+                  onClick={handleLogin}
+                  style={{ width: '100%', padding: '10px', background: '#0969da', color: 'white', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+                >
+                  Sign In
+                </button>
+                <p style={{ fontSize: '12px', color: '#57606a', marginTop: '12px', textAlign: 'center' }}>
+                  Need a token? <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" style={{ color: '#0969da' }}>Generate one here</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
       return (
         <div>
-          <div>
-            <input 
-              type="password" 
-              value={token} 
-              onChange={(e) => {
-                setToken(e.target.value);
-                localStorage.setItem('gh_token', e.target.value);
-              }}
-              placeholder="GitHub Token"
-            />
-            <button onClick={fetchActivity}>Load Activity</button>
+          <div className="header">
+            <div className="header-left">
+              <div className="logo">GT</div>
+              <div className="header-title">
+                <h1>GHOD View</h1>
+                <p>GitHub Daily Activity Stream</p>
+              </div>
+            </div>
+            <div className="header-right">
+              <span>👤 {user?.login || 'Loading...'}</span>
+              <span>📅 {today}</span>
+              <button 
+                onClick={handleLogout}
+                style={{ padding: '6px 12px', background: '#f6f8fa', border: '1px solid #d0d7de', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
           
           {uniqueRepos.length > 0 && (
-            <div style={{ padding: '10px', borderBottom: '2px solid #ccc', marginBottom: '20px' }}>
-              <strong>Active Repos:</strong>{' '}
+            <div className="repos-bar">
+              <strong>Active Repos:</strong>
               {uniqueRepos.map((repo, i) => (
                 <span key={repo}>
                   <a href={`https://github.com/${repo}`} target="_blank" rel="noopener noreferrer">{repo}</a>
-                  {i < uniqueRepos.length - 1 && ' | '}
+                  {i < uniqueRepos.length - 1 && ' |'}
                 </span>
               ))}
             </div>
           )}
-          
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <div style={{ flex: '2' }}>
+
+          <div className="container">
+            <div className="main-content">
               {Object.entries(activity).map(([day, events]) => {
-            const date = new Date(day + 'T00:00:00');
-            const formatted = date.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            });
-            
-            return (
-              <div key={day}>
-                <h2>{formatted}</h2>
-                <ul>
-                  {events.map(e => (
-                    <li key={e.id}>
-                      {e.type} - <a href={`https://github.com/${e.repo.name}`} target="_blank" rel="noopener noreferrer">{e.repo.name}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+                const date = new Date(day + 'T00:00:00');
+                const formatted = date.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                });
+                
+                return (
+                  <div key={day} className="day-section">
+                    <div className="day-header">{formatted}</div>
+                    {events.map(e => {
+                      const icon = getEventIcon(e.type);
+                      const desc = getEventDescription(e);
+                      const time = new Date(e.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                      
+                      return (
+                        <div key={e.id} className="activity-item">
+                          <div className={`activity-icon ${icon.class}`}>{icon.label}</div>
+                          <div className="activity-content">
+                            <div className="activity-type">{e.type.replace('Event', '')}</div>
+                            <div className="activity-repo">
+                              <a href={`https://github.com/${e.repo.name}`} target="_blank" rel="noopener noreferrer">
+                                {e.repo.name}
+                              </a>
+                            </div>
+                            {desc && <div className="activity-desc">{desc}</div>}
+                            <div className="activity-time">{time}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
             
-            <div style={{ flex: '1', borderLeft: '2px solid #ccc', paddingLeft: '20px' }}>
-              <h3>Assigned Issues</h3>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {assignedIssues.map(issue => (
-                  <li key={issue.id} style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                    <a href={issue.html_url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold' }}>
-                      {issue.title}
-                    </a>
-                    <div style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
-                      {issue.repository_url.split('/').slice(-2).join('/')} • #{issue.number}
+            <div className="sidebar">
+              <div className="card">
+                <div className="card-header">
+                  📝 My Notes for Today
+                </div>
+                <div className="card-body">
+                  <textarea 
+                    className="notes-textarea"
+                    value={notes}
+                    onChange={(e) => {
+                      setNotes(e.target.value);
+                      localStorage.setItem('daily_notes', e.target.value);
+                    }}
+                    placeholder="Add your notes for today..."
+                  />
+                  <div className="notes-hint">These notes will only appear on this computer</div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  ⏰ Assigned Issues
+                </div>
+                <div className="card-body">
+                  {assignedIssues.map(issue => (
+                    <div key={issue.id} className="issue-item">
+                      <div className="issue-title">
+                        <a href={issue.html_url} target="_blank" rel="noopener noreferrer">
+                          {issue.title}
+                        </a>
+                      </div>
+                      <div className="issue-meta">
+                        {issue.repository_url.split('/').slice(-2).join('/')} • <span className="issue-number">#{issue.number}</span>
+                      </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
