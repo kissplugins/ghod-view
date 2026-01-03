@@ -147,7 +147,13 @@ This is a personal tool but contributions are welcome! Feel free to:
 
 ## License
 
-MIT License - See LICENSE file for details
+Fair Source License (FSL-1.1-MIT) with 5-user limit - See LICENSE file for details.
+
+**Usage Limitation:** Free for up to 5 users within your organization. For more than 5 users, a commercial license is required.
+
+**MIT Transition:** This project will automatically become MIT licensed on January 2, 2028.
+
+For commercial licensing inquiries: info@hypercart.io
 
 ## Support
 

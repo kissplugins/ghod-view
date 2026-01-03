@@ -70,12 +70,74 @@
       const [user, setUser] = React.useState(null);
       const [loading, setLoading] = React.useState(false);
       const [tokenInput, setTokenInput] = React.useState('');
+      const [copySuccess, setCopySuccess] = React.useState(false);
+      const [gistSuccess, setGistSuccess] = React.useState(false);
+      const [savingGist, setSavingGist] = React.useState(false);
       
       React.useEffect(() => {
         if (token) {
           fetchActivity();
         }
       }, []);
+      
+      async function copyToClipboard() {
+        try {
+          await navigator.clipboard.writeText(notes);
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+          alert('Failed to copy to clipboard');
+        }
+      }
+      
+      async function saveToGist() {
+        if (!notes || !token) return;
+        setSavingGist(true);
+        setGistSuccess(false);
+        
+        const today = new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        const gistData = {
+          description: `GHOD View Notes - ${today}`,
+          public: false,
+          files: {
+            [`ghod-notes-${new Date().toISOString().split('T')[0]}.md`]: {
+              content: `# GHOD View Notes - ${today}\n\n${notes}`
+            }
+          }
+        };
+        
+        try {
+          const response = await fetch('https://api.github.com/gists', {
+            method: 'POST',
+            headers: {
+              'Authorization': `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gistData)
+          });
+          
+          if (response.ok) {
+            const gist = await response.json();
+            setGistSuccess(true);
+            setTimeout(() => setGistSuccess(false), 3000);
+            // Optionally open the gist in a new tab
+            window.open(gist.html_url, '_blank');
+          } else {
+            throw new Error('Failed to create gist');
+          }
+        } catch (err) {
+          console.error('Failed to save to gist:', err);
+          alert('Failed to save to GitHub Gist. Make sure your token has "gist" scope.');
+        } finally {
+          setSavingGist(false);
+        }
+      }
       
       async function fetchActivity() {
         if (!token) return;
@@ -194,7 +256,8 @@
                   Sign In
                 </button>
                 <p style={{ fontSize: '12px', color: '#57606a', marginTop: '12px', textAlign: 'center' }}>
-                  Need a token? <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" style={{ color: '#0969da' }}>Generate one here</a>
+                  Need a token? <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" style={{ color: '#0969da' }}>Generate one here</a><br/>
+                  <span style={{ fontSize: '11px' }}>Scopes needed: <code>repo</code>, <code>read:user</code>, <code>gist</code></span>
                 </p>
               </div>
             </div>
@@ -291,6 +354,20 @@
                     }}
                     placeholder="Add your notes for today..."
                   />
+                  <button 
+                    className={`copy-btn ${copySuccess ? 'success' : ''}`}
+                    onClick={copyToClipboard}
+                    disabled={!notes}
+                  >
+                    {copySuccess ? '✓ Copied!' : '📋 Copy to Clipboard'}
+                  </button>
+                  <button 
+                    className={`gist-btn ${gistSuccess ? 'success' : ''}`}
+                    onClick={saveToGist}
+                    disabled={!notes || savingGist}
+                  >
+                    {savingGist ? '💾 Saving...' : gistSuccess ? '✓ Saved to Gist!' : '💾 Save to GitHub Gist'}
+                  </button>
                   <div className="notes-hint">These notes will only appear on this computer</div>
                 </div>
               </div>
