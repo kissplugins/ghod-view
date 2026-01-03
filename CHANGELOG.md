@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Restored PullRequest activity rows to show PR link text (title when available) and added an API-backed fallback to populate missing titles.
 - Restored Previous Day filtering with a fallback to the nearest earlier activity day key when the exact date key has no events.
+- Fetch now pulls multiple event pages (up to 3) so Previous Day isn't pushed out by heavy activity today.
 
 ### Changed
 - Reduced PullRequest title line font size to match other metadata.

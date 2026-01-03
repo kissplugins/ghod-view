@@ -177,10 +177,36 @@
           setUser(userData);
         
           
-          // Fetch user events
-          const response = await fetch(`https://api.github.com/users/${userData.login}/events?per_page=100`, { headers });
-          if (!response.ok) throw new Error(`Events fetch failed: ${response.status}`);
-          const events = await response.json();
+          // Fetch user events (pull multiple pages so "Previous Day" isn't pushed out by heavy activity today)
+          const perPage = 100;
+          const maxPages = 3;
+          const localTodayKey = getLocalDayKey(new Date());
+          let page = 1;
+          let events = [];
+
+          while (page <= maxPages) {
+            const response = await fetch(
+              `https://api.github.com/users/${userData.login}/events?per_page=${perPage}&page=${page}`,
+              { headers }
+            );
+            if (!response.ok) throw new Error(`Events fetch failed: ${response.status}`);
+            const pageEvents = await response.json();
+            if (!Array.isArray(pageEvents) || pageEvents.length === 0) break;
+            events = events.concat(pageEvents);
+
+            // Stop early once we have at least one prior-day key available
+            const groupedPreview = pageEvents.reduce((acc, event) => {
+              const day = getLocalDayKey(event.created_at);
+              acc[day] = true;
+              return acc;
+            }, {});
+            const previewKeys = Object.keys(groupedPreview);
+            const hasPriorDayInThisPage = previewKeys.some((k) => k < localTodayKey);
+            if (hasPriorDayInThisPage) break;
+
+            if (pageEvents.length < perPage) break;
+            page += 1;
+          }
           
           // Group by local day (timezone-aware)
           const grouped = events.reduce((acc, event) => {
@@ -190,7 +216,7 @@
             return acc;
           }, {});
           const keys = Object.keys(grouped).sort();
-          console.log('GHOD day keys (local tz)', keys);
+          console.log('GHOD day keys (local tz)', keys, `(events=${events.length}, pages=${page})`);
           setDebugInfo((prev) => ({ ...prev, keys }));
           setActivity(grouped);
           
