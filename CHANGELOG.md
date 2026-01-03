@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-01-02
 
+## [1.1.0] - 2026-01-02
+
+### Added
+- Previous/Today day filter using local timezone day keys with on-screen debug panel (toggleable via Settings bar).
+- Config bar at top to show/hide debug UI and panel without removing functionality.
+- Branch links in activity items for branch-related events (push/create/delete) linking to repo tree.
+
+### Changed
+- Active Repos now reflects repos from the currently viewed day (falls back to all if filter empty).
+- Event fetch now requests up to 100 recent events to reduce truncation.
+
 ### Added
 - **Complete GitHub Activity Feed** - Unified view of all GitHub activity across organizations
   - Daily grouped activity with formatted dates (e.g., "Friday, January 2, 2026")
