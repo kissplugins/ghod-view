@@ -36,6 +36,9 @@
     .activity-repo a:hover { text-decoration: underline; }
     .activity-desc { font-size: 13px; color: #57606a; margin-top: 4px; }
     .activity-time { font-size: 12px; color: #57606a; margin-top: 4px; }
+    .activity-branch { font-size: 12px; color: #57606a; margin-top: 4px; }
+    .activity-branch a { color: #0969da; text-decoration: none; }
+    .activity-branch a:hover { text-decoration: underline; }
     .card { background: white; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 16px; overflow: hidden; }
     .card-header { padding: 16px 20px; border-bottom: 1px solid #d0d7de; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
     .card-body { padding: 20px; }
@@ -86,6 +89,8 @@
       const [savingGist, setSavingGist] = React.useState(false);
       const [dayFilter, setDayFilter] = React.useState('today');
       const [showDebug, setShowDebug] = React.useState(true);
+      const [showConfig, setShowConfig] = React.useState(false);
+      const [enableDebugUI, setEnableDebugUI] = React.useState(true);
       const [debugInfo, setDebugInfo] = React.useState({ fetchError: null, keys: [] });
       
       React.useEffect(() => {
@@ -244,6 +249,18 @@
         return '';
       };
 
+      const getBranchData = (event) => {
+        const ref = event?.payload?.ref;
+        const repo = event?.repo?.name;
+        if (!ref || !repo) return null;
+        const branch = ref.replace(/^refs\/heads\//, '');
+        if (!branch) return null;
+        return {
+          branch,
+          url: `https://github.com/${repo}/tree/${branch}`
+        };
+      };
+
       const getLocalDayKey = (value) => new Date(value).toLocaleDateString('en-CA');
 
       const todayDate = new Date();
@@ -322,6 +339,28 @@
             </div>
           </div>
           
+          <div className="config-bar">
+            <button className="config-toggle" onClick={() => setShowConfig(!showConfig)}>
+              {showConfig ? 'Hide Settings' : 'Show Settings'}
+            </button>
+            {showConfig && (
+              <>
+                <button 
+                  className={`config-toggle ${showDebug ? 'active' : ''}`}
+                  onClick={() => setShowDebug(!showDebug)}
+                >
+                  {showDebug ? 'Hide' : 'Show'} Debug Panel
+                </button>
+                <button 
+                  className={`config-toggle ${enableDebugUI ? 'active' : ''}`}
+                  onClick={() => setEnableDebugUI(!enableDebugUI)}
+                >
+                  {enableDebugUI ? 'Disable' : 'Enable'} Debug UI
+                </button>
+              </>
+            )}
+          </div>
+
           {uniqueRepos.length > 0 && (
             <div className="repos-bar">
               <strong>Active Repos:</strong>
@@ -354,7 +393,7 @@
             </span>
           </div>
 
-          {showDebug && (
+          {showDebug && enableDebugUI && (
             <div className="debug-card">
               <div><strong>Debug:</strong> dayFilter={dayFilter}, todayKey={todayKey}, previousDayKey={previousDayKey}</div>
               <div style={{ marginTop: '6px' }}>Available days (newest first):</div>
@@ -395,6 +434,12 @@
                         const icon = getEventIcon(e.type);
                         const desc = getEventDescription(e);
                         const time = new Date(e.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        const branchInfo = getBranchData(e);
+                        const isBranchEvent = branchInfo && (
+                          e.type === 'PushEvent' ||
+                          (e.type === 'CreateEvent' && e.payload?.ref_type === 'branch') ||
+                          (e.type === 'DeleteEvent' && e.payload?.ref_type === 'branch')
+                        );
                         
                         return (
                           <div key={e.id} className="activity-item">
@@ -406,6 +451,11 @@
                                   {e.repo.name}
                                 </a>
                               </div>
+                              {isBranchEvent && branchInfo && (
+                                <div className="activity-branch">
+                                  Branch: <a href={branchInfo.url} target="_blank" rel="noopener noreferrer">{branchInfo.branch}</a>
+                                </div>
+                              )}
                               {desc && <div className="activity-desc">{desc}</div>}
                               <div className="activity-time">{time}</div>
                             </div>
