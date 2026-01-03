@@ -65,13 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Customization examples
   - Troubleshooting section
 
-### Changed
-- **License** - Switched from Apache 2.0 to Fair Source License (FSL-1.1-MIT)
-  - Free for up to 5 users per organization
-  - Commercial license required for 6+ users
-  - Automatic MIT transition after 2 years (January 2, 2028)
-  - Contact: info@hypercart.io
-
 ### Technical Details
 - **Stack**: Pure HTML + React 18 (CDN) + Babel Standalone
 - **API**: GitHub REST API v3
