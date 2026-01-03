@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced PullRequest title line font size to match other metadata.
 - Moved typography/layout CSS from inline `<style>` to external `styles.css`.
 - Debug panel now defaults to off (can be enabled via Settings).
+- Standardized typography to four font sizes (Large/Medium/Small/Extra Small).
 
 ## [1.1.0] - 2026-01-02
 
