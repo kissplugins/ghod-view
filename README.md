@@ -1,5 +1,7 @@
 # The GitHub Daily View You've Always Wanted and Deserved
 
+<img width="1493" height="951" alt="ghod-view" src="https://github.com/user-attachments/assets/0660f062-7cac-4580-88a7-7e5adb7f1ee3" />
+
 A lightweight, client-side GitHub activity aggregator that finally gives you a unified view of your work across all repositories and organizations. No more juggling between repos to answer "what did I do today?"
 
 ## Why This Exists
