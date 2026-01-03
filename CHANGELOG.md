@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debug panel now defaults to off (can be enabled via Settings).
 - Standardized typography to four font sizes (Large/Medium/Small/Extra Small).
 - Styled Active Repos list as bubble-like chips.
+- Styled Assigned Issues repo links as 12px pill chips.
 
 ## [1.1.0] - 2026-01-02
 

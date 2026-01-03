@@ -649,7 +649,9 @@
                           </a>
                         </div>
                         <div className="issue-meta">
-                          <a href={repoUrl} target="_blank" rel="noopener noreferrer">{repoName}</a> • <span className="issue-number">#{issue.number}</span>
+                          <a className="issue-repo-chip" href={repoUrl} target="_blank" rel="noopener noreferrer">{repoName}</a>
+                          <span>•</span>
+                          <span className="issue-number">#{issue.number}</span>
                         </div>
                       </div>
                     );
