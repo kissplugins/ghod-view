@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Styled Active Repos list as bubble-like chips.
 - Styled Assigned Issues repo links as 12px pill chips.
 - Styled Activity Feed repo names as 14px grey pills; Active Repos pills now 14px with a light-blue background for contrast.
+- Added LLM safeguard comments around critical GitHub integration, date-grouping logic, and key typography/pill CSS to reduce accidental refactors.
 
 ## [1.1.0] - 2026-01-02
 

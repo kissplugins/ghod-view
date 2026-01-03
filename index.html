@@ -13,7 +13,27 @@
   <div id="root"></div>
   
   <script type="text/babel">
+    /*
+      SAFEGUARD (LLM):
+      This file is intentionally a single-page, client-only React app.
+
+      Critical areas that should NOT be refactored casually (even if they look “simplifiable”):
+      - GitHub REST API integration: auth header format, endpoints, pagination, and error handling.
+      - Local-day grouping/filtering logic: uses local timezone day keys for UX correctness.
+      - PR title fallback + caching: avoids broken/missing titles while limiting API calls.
+      - Storage keys (localStorage): used for token + notes persistence; changing keys breaks UX.
+
+      If changes are needed, keep behavior identical and validate manually:
+      - Login → fetch → day filter (Today/Previous Day) → PR title rendering → assigned issues → gist save.
+    */
     function GitHubActivityFeed() {
+      /*
+        SAFEGUARD (LLM): Storage keys and persistence
+        - Keys are part of the public UX contract for this app.
+        - Do not rename/migrate these without an explicit migration plan.
+          - 'gh_token'    : GitHub Personal Access Token (PAT)
+          - 'daily_notes' : user notes content
+      */
       const [token, setToken] = React.useState(localStorage.getItem('gh_token') || '');
       const [activity, setActivity] = React.useState([]);
       const [assignedIssues, setAssignedIssues] = React.useState([]);
@@ -34,6 +54,12 @@
       const [prCache, setPrCache] = React.useState({});
 
       React.useEffect(() => {
+        /*
+          SAFEGUARD (LLM): Typography inspector guardrails
+          - Uses requestAnimationFrame throttling to avoid performance issues.
+          - Explicitly ignores elements inside [data-debug-ui="true"] to prevent self-inspection loops.
+          - Keep the event listener passive and the overlay pointer-events disabled.
+        */
         if (!enableTypographyInspect || !enableDebugUI) {
           setHoveredTypography(null);
           return;
@@ -93,6 +119,13 @@
       }
       
       async function saveToGist() {
+        /*
+          SAFEGUARD (LLM): GitHub Gist integration
+          - Endpoint: POST https://api.github.com/gists
+          - Requires PAT with 'gist' scope.
+          - Payload shape matters (description/public/files).
+          - Keep headers and JSON encoding as-is unless you re-test end-to-end.
+        */
         if (!notes || !token) return;
         setSavingGist(true);
         setGistSuccess(false);
@@ -141,6 +174,16 @@
       }
       
       async function fetchActivity(manualToken) {
+        /*
+          SAFEGUARD (LLM): Core GitHub integration
+          - Auth header must be: Authorization: token <PAT> (current app behavior)
+          - Fetch flow order matters:
+            1) /user (determine login)
+            2) /users/:login/events (paginated; up to maxPages)
+            3) /issues?filter=assigned... (sidebar)
+          - Pagination is intentionally capped (maxPages) to balance correctness and rate limits.
+          - The “Previous Day” UX depends on pulling multiple pages and local-day grouping.
+        */
         const activeToken = manualToken || token;
         if (!activeToken) return;
         setLoading(true);
@@ -215,6 +258,7 @@
       function handleLogin() {
         if (tokenInput) {
           setToken(tokenInput);
+          // SAFEGUARD (LLM): do not rename 'gh_token' without migration.
           localStorage.setItem('gh_token', tokenInput);
           fetchActivity(tokenInput);
         }
@@ -225,6 +269,7 @@
         setUser(null);
         setActivity([]);
         setAssignedIssues([]);
+        // SAFEGUARD (LLM): do not rename 'gh_token' without migration.
         localStorage.removeItem('gh_token');
       }
       
@@ -271,6 +316,12 @@
       };
 
       const getPullRequestData = (event) => {
+        /*
+          SAFEGUARD (LLM): PullRequestEvent parsing + cache contract
+          - GitHub event payloads are inconsistent; number/title/url may be missing.
+          - cacheKey format MUST remain: "owner/repo#<number>" (used throughout PR cache).
+          - Fallback title '#<number>' is required to keep rows readable.
+        */
         if (event?.type !== 'PullRequestEvent') return null;
 
         const repoName = event?.repo?.name;
@@ -294,6 +345,12 @@
       };
 
       React.useEffect(() => {
+        /*
+          SAFEGUARD (LLM): PR title backfill
+          - This is a best-effort fallback to populate missing PR titles.
+          - Intentionally limits requests (slice(0, 15)) to reduce rate-limit risk.
+          - Must be resilient: per-PR failures should not break the feed.
+        */
         const activeToken = token || localStorage.getItem('gh_token') || '';
         if (!activeToken) return;
 
@@ -340,6 +397,12 @@
       }, [activity, token]);
 
       const getLocalDayKey = (value) => new Date(value).toLocaleDateString('en-CA');
+
+      /*
+        SAFEGUARD (LLM): Local-day key logic
+        - Uses local timezone keys (YYYY-MM-DD) via 'en-CA' formatting.
+        - Do not change to UTC/ISO without re-validating “Today” and “Previous Day” behavior.
+      */
 
       const todayDate = new Date();
       const todayLabel = todayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
