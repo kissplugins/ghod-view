@@ -12,9 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Pull request events now show the PR title with a direct link in the activity feed.
 
-### Fixed
-- Pull request link text now falls back to PR number/head ref so titles always render instead of the generic label.
-
 ### Added
 - Previous/Today day filter using local timezone day keys with on-screen debug panel (toggleable via Settings bar).
 - Config bar at top to show/hide debug UI and panel without removing functionality.

@@ -268,11 +268,8 @@
       const getPullRequestData = (event) => {
         const pr = event?.payload?.pull_request;
         if (!pr) return null;
-        const number = pr.number ? `#${pr.number}` : null;
-        const baseTitle = pr.title || pr.head?.ref || pr.base?.ref || 'Pull request';
-        const title = number ? `${number}: ${baseTitle}` : baseTitle;
         return {
-          title,
+          title: pr.title || 'Pull request',
           url: pr.html_url || pr._links?.html?.href
         };
       };
