@@ -31,6 +31,11 @@
         setActivity(grouped);
       }
       
+      // Get unique repos
+      const uniqueRepos = [...new Set(
+        Object.values(activity).flat().map(e => e.repo.name)
+      )].sort();
+      
       return (
         <div>
           <input 
@@ -44,10 +49,32 @@
           />
           <button onClick={fetchActivity}>Load Activity</button>
           
-          {Object.entries(activity).map(([day, events]) => (
-            <div key={day}>
-              <h2>{day}</h2>
-              <ul>
+          {uniqueRepos.length > 0 && (
+            <div style={{ padding: '10px', borderBottom: '2px solid #ccc', marginBottom: '20px' }}>
+              <strong>Active Repos:</strong>{' '}
+              {uniqueRepos.map((repo, i) => (
+                <span key={repo}>
+                  <a href={`https://github.com/${repo}`} target="_blank" rel="noopener noreferrer">{repo}</a>
+                  {i < uniqueRepos.length - 1 && ' | '}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          {Object.entries(activity).map(([day, events]) => {
+            const date = new Date(day + 'T00:00:00');
+            const formatted = date.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            });
+            
+            return (
+              <div key={day}>
+            );
+          }     <h2>{formatted}</h2>
+                <ul>
                 {events.map(e => (
                   <li key={e.id}>
                     {e.type} - <a href={`https://github.com/${e.repo.name}`} target="_blank" rel="noopener noreferrer">{e.repo.name}</a>
