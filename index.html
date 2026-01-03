@@ -288,9 +288,27 @@
 
       const getEventDescription = (event) => {
         const time = new Date(event.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        const getCommitSummary = (message) => {
+          if (!message || typeof message !== 'string') return '';
+          const firstLine = message.split(/\r?\n/)[0] || '';
+          return firstLine.trim();
+        };
         
         if (event.type === 'PushEvent') {
-          return event.payload.commits?.[0]?.message || 'Updated code';
+          const commitSummary = getCommitSummary(event.payload?.commits?.[0]?.message);
+          const commitCount = Number.isFinite(event.payload?.size) ? event.payload.size : (event.payload?.commits?.length || 0);
+
+          if (commitSummary) {
+            const moreCount = Math.max(0, commitCount - 1);
+            return moreCount > 0 ? `${commitSummary} (+${moreCount} more)` : commitSummary;
+          }
+
+          if (commitCount > 0) {
+            return `Pushed ${commitCount} commit${commitCount === 1 ? '' : 's'}`;
+          }
+
+          return 'Pushed commits';
         } else if (event.type === 'CreateEvent') {
           return `Created new ${event.payload.ref_type} "${event.payload.ref || ''}"`;
         } else if (event.type === 'DeleteEvent') {
