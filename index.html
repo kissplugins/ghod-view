@@ -400,12 +400,19 @@
           {uniqueRepos.length > 0 && (
             <div className="repos-bar">
               <strong>Active Repos:</strong>
-              {uniqueRepos.map((repo, i) => (
-                <span key={repo}>
-                  <a href={`https://github.com/${repo}`} target="_blank" rel="noopener noreferrer">{repo}</a>
-                  {i < uniqueRepos.length - 1 && ' |'}
-                </span>
-              ))}
+              <div className="repos-chips">
+                {uniqueRepos.map((repo) => (
+                  <a
+                    key={repo}
+                    className="repo-chip"
+                    href={`https://github.com/${repo}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {repo}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 
