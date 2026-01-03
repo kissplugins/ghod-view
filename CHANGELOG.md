@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2026-01-02
 
+## [1.1.3] - 2026-01-02
+
+### Fixed
+- Pull request links now fall back to PR number/head/base labels so titles appear even when the API omits `title`.
+- Previous Day view now falls back to the most recent earlier day key when the exact calendar key is missing, improving reliability across timezones.
+
 ## [1.1.1] - 2026-01-02
 
 ### Added

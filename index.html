@@ -268,8 +268,8 @@
       const getPullRequestData = (event) => {
         const pr = event?.payload?.pull_request;
         if (!pr) return null;
-        const number = pr.number ? `#${pr.number}` : null;
-        const baseTitle = pr.title || pr.head?.ref || pr.base?.ref || 'Pull request';
+        const number = pr.number ? `#${pr.number}` : (event?.payload?.number ? `#${event.payload.number}` : null);
+        const baseTitle = pr.title || pr.head?.label || pr.head?.ref || pr.base?.label || pr.base?.ref || 'Pull request';
         const title = number ? `${number}: ${baseTitle}` : baseTitle;
         return {
           title,
@@ -286,11 +286,14 @@
       previousDate.setDate(previousDate.getDate() - 1);
       const previousDayLabel = previousDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       const previousDayKey = getLocalDayKey(previousDate);
+      const availableDayKeysDesc = Object.keys(activity || {}).sort().reverse();
+      const fallbackPreviousKey = availableDayKeysDesc.find(k => k < todayKey) || null;
+      const previousTargetKey = (activity && activity[previousDayKey]) ? previousDayKey : fallbackPreviousKey;
       const selectedDayLabel = dayFilter === 'today' ? todayLabel : previousDayLabel;
-      const availableDayKeys = Object.keys(activity || {}).sort().reverse();
+      const availableDayKeys = availableDayKeysDesc;
       const filteredActivityEntries = Object.entries(activity).filter(([day]) => {
         if (dayFilter === 'today') return day === todayKey;
-        if (dayFilter === 'previous') return day === previousDayKey;
+        if (dayFilter === 'previous') return previousTargetKey ? day === previousTargetKey : false;
         return true;
       });
       
@@ -412,6 +415,7 @@
           {showDebug && enableDebugUI && (
             <div className="debug-card">
               <div><strong>Debug:</strong> dayFilter={dayFilter}, todayKey={todayKey}, previousDayKey={previousDayKey}</div>
+              <div style={{ marginTop: '4px' }}>Resolved previousTargetKey: {previousTargetKey || 'none'}</div>
               <div style={{ marginTop: '6px' }}>Available days (newest first):</div>
               <div className="debug-pre">{availableDayKeys.join('\n') || 'none'}</div>
               {debugInfo.fetchError && (
