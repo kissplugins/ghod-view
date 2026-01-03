@@ -5,7 +5,15 @@ All notable changes to GHOD View will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-01-02
+## [1.1.1] - 2026-01-02
+
+### Fixed
+- Restored PullRequest activity rows to show PR link text (title when available) and added an API-backed fallback to populate missing titles.
+- Restored Previous Day filtering with a fallback to the nearest earlier activity day key when the exact date key has no events.
+- Fetch now pulls multiple event pages (up to 3) so Previous Day isn't pushed out by heavy activity today.
+
+### Changed
+- Reduced PullRequest title line font size to match other metadata.
 
 ## [1.1.0] - 2026-01-02
 
@@ -65,13 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Customization examples
   - Troubleshooting section
 
-### Changed
-- **License** - Switched from Apache 2.0 to Fair Source License (FSL-1.1-MIT)
-  - Free for up to 5 users per organization
-  - Commercial license required for 6+ users
-  - Automatic MIT transition after 2 years (January 2, 2028)
-  - Contact: info@hypercart.io
-
 ### Technical Details
 - **Stack**: Pure HTML + React 18 (CDN) + Babel Standalone
 - **API**: GitHub REST API v3
@@ -91,6 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Minimal scope requirements documented
 - Periodic token rotation recommended
 - Warning against admin/delete permissions
+
+## [1.0.0] - 2026-01-02
 
 ---
 
