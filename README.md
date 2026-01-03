@@ -35,8 +35,13 @@ cd ghod-view
 ### 2. Get a GitHub Personal Access Token
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click "Generate new token (classic)"
-3. Select scopes: `repo` and `read:user`
-4. Generate and copy the token
+3. Give it a descriptive name (e.g., "GHOD View")
+4. Select the following scopes:
+   - ✅ `repo` (Full control of private repositories)
+   - ✅ `read:user` (Read user profile data)
+   - ✅ `gist` (Create and read gists) - **Required for saving notes to GitHub Gist**
+5. Click "Generate token" at the bottom
+6. **Important:** Copy the token immediately - you won't be able to see it again!
 
 ### 3. Open in Browser
 Simply open `index.html` in your browser (double-click or drag to browser).
@@ -115,7 +120,7 @@ const icons = {
 ⚠️ **Token Storage:** Your Personal Access Token is stored in browser localStorage. This is less secure than server-side storage but acceptable for a client-side tool.
 
 **Best Practices:**
-- Use a token with minimal required scopes (`repo`, `read:user`)
+- Use a token with minimal required scopes (`repo`, `read:user`, `gist`)
 - Don't use tokens with `admin` or `delete` permissions
 - Revoke tokens periodically at [github.com/settings/tokens](https://github.com/settings/tokens)
 - Don't share your token or commit it to version control
