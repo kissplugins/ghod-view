@@ -176,3 +176,5 @@ Having issues? Check these common solutions:
 ---
 
 Built with ☕ by developers, for developers. Because we all deserve better GitHub activity views.
+
+GHOD View © Copyright 2026 Hypercart DBA Neochrome, Inc. | info@hypercart.io
