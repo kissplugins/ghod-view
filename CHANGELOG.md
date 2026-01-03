@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1] - 2026-01-02
 
+### Added
+- Debug option: Typography Inspect (hover to view font-family, font-size, font-weight, line-height, font-style, letter-spacing).
+
 ### Fixed
 - Restored PullRequest activity rows to show PR link text (title when available) and added an API-backed fallback to populate missing titles.
 - Restored Previous Day filtering with a fallback to the nearest earlier activity day key when the exact date key has no events.
