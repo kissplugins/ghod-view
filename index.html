@@ -158,10 +158,11 @@
         }
       }
       
-      async function fetchActivity() {
-        if (!token) return;
+      async function fetchActivity(manualToken) {
+        const activeToken = manualToken || token;
+        if (!activeToken) return;
         setLoading(true);
-        const headers = { 'Authorization': `token ${token}` };
+        const headers = { 'Authorization': `token ${activeToken}` };
         setDebugInfo((prev) => ({ ...prev, fetchError: null }));
         
         try {
@@ -207,7 +208,7 @@
         if (tokenInput) {
           setToken(tokenInput);
           localStorage.setItem('gh_token', tokenInput);
-          fetchActivity();
+          fetchActivity(tokenInput);
         }
       }
       
